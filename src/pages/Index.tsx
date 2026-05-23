@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 
 const HERO_IMAGE = "https://cdn.poehali.dev/projects/f603708c-5b71-43b9-b59e-c4d7b5f89356/files/2123a654-4626-4494-a629-df8692a8e5aa.jpg";
@@ -53,6 +54,7 @@ const reviews = [
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [agreed, setAgreed] = useState(false);
   const aboutSection = useInView();
   const servicesSection = useInView();
   const transformSection = useInView();
@@ -369,8 +371,34 @@ export default function Index() {
                   <textarea rows={4} placeholder="Расскажите о себе и своей задаче"
                     className="w-full bg-transparent border border-champagne/20 focus:border-gold/60 outline-none px-5 py-4 text-champagne placeholder:text-champagne/30 text-sm resize-none transition-colors duration-300" />
                 </div>
+                <label className="flex items-start gap-3 cursor-pointer group select-none pt-2">
+                  <span className="relative flex-shrink-0 mt-0.5">
+                    <input
+                      type="checkbox"
+                      checked={agreed}
+                      onChange={(e) => setAgreed(e.target.checked)}
+                      className="peer sr-only"
+                    />
+                    <span className="block w-5 h-5 border border-champagne/30 group-hover:border-gold/60 peer-checked:border-gold peer-checked:bg-gold transition-all duration-300" />
+                    {agreed && (
+                      <Icon name="Check" size={12} className="absolute top-1 left-1 text-obsidian pointer-events-none" />
+                    )}
+                  </span>
+                  <span className="text-champagne/50 text-xs leading-relaxed">
+                    Я принимаю условия{" "}
+                    <Link to="/privacy" className="text-gold/80 hover:text-gold underline underline-offset-2 decoration-gold/40">
+                      Политики конфиденциальности
+                    </Link>
+                    {" "}и даю{" "}
+                    <Link to="/consent" className="text-gold/80 hover:text-gold underline underline-offset-2 decoration-gold/40">
+                      согласие на обработку персональных данных
+                    </Link>
+                    {" "}в соответствии с ФЗ-152
+                  </span>
+                </label>
                 <button type="submit"
-                  className="w-full bg-gold text-obsidian text-xs tracking-[0.3em] uppercase py-4 font-semibold hover:bg-gold-light transition-all duration-300 hover:shadow-[0_0_30px_rgba(201,168,76,0.4)]">
+                  disabled={!agreed}
+                  className="w-full bg-gold text-obsidian text-xs tracking-[0.3em] uppercase py-4 font-semibold hover:bg-gold-light transition-all duration-300 hover:shadow-[0_0_30px_rgba(201,168,76,0.4)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:bg-gold">
                   Отправить заявку
                 </button>
               </form>
@@ -380,16 +408,25 @@ export default function Index() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-champagne/10 py-10">
-        <div className="container max-w-6xl mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <span className="font-cormorant text-2xl tracking-[0.2em] text-gold font-light">SV STYLIST</span>
-          <p className="text-champagne/30 text-xs tracking-widest">© 2024 Светлана Власова · Персональный стилист</p>
-          <div className="flex gap-6">
-            {[["Instagram","@sv_stylist"],["MessageCircle","Telegram"]].map(([icon, label]) => (
-              <button key={label} className="text-champagne/30 hover:text-gold transition-colors duration-300 text-xs tracking-widest">
-                {label}
-              </button>
-            ))}
+      <footer className="border-t border-champagne/10 py-12">
+        <div className="container max-w-6xl mx-auto px-8 space-y-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <span className="font-cormorant text-2xl tracking-[0.2em] text-gold font-light">SV STYLIST</span>
+            <div className="flex flex-wrap gap-x-8 gap-y-3 justify-center text-xs tracking-[0.2em] uppercase">
+              <Link to="/privacy" className="text-champagne/50 hover:text-gold transition-colors">Политика конфиденциальности</Link>
+              <Link to="/consent" className="text-champagne/50 hover:text-gold transition-colors">Согласие на обработку ПДн</Link>
+              <Link to="/terms" className="text-champagne/50 hover:text-gold transition-colors">Пользовательское соглашение</Link>
+            </div>
+          </div>
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-6 border-t border-champagne/10">
+            <p className="text-champagne/30 text-xs tracking-widest">© 2024 Светлана Власова · Персональный стилист</p>
+            <div className="flex gap-6">
+              {[["Instagram","@sv_stylist"],["MessageCircle","Telegram"]].map(([_, label]) => (
+                <button key={label} className="text-champagne/30 hover:text-gold transition-colors duration-300 text-xs tracking-widest">
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </footer>
