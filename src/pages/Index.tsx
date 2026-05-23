@@ -55,6 +55,7 @@ export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [agreed, setAgreed] = useState(false);
+  const [form, setForm] = useState({ name: "", phone: "", service: "", message: "" });
   const aboutSection = useInView();
   const servicesSection = useInView();
   const transformSection = useInView();
@@ -64,6 +65,37 @@ export default function Index() {
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setMenuOpen(false);
+  };
+
+  const buildMessageText = () => {
+    const lines = [
+      "Здравствуйте! Заявка с сайта SV STYLIST:",
+      "",
+      `Имя: ${form.name || "—"}`,
+      `Телефон: ${form.phone || "—"}`,
+      `Услуга: ${form.service || "—"}`,
+      `Сообщение: ${form.message || "—"}`,
+    ];
+    return lines.join("\n");
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!agreed) return;
+
+    const text = buildMessageText();
+    const subject = `Заявка с сайта SV STYLIST${form.name ? ` — ${form.name}` : ""}`;
+
+    const tgUrl = `https://t.me/vladimir_kozlove?text=${encodeURIComponent(text)}`;
+    window.open(tgUrl, "_blank");
+
+    const mailUrl = `mailto:theboban@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+    window.location.href = mailUrl;
+  };
+
+  const openTelegramOnly = () => {
+    const text = buildMessageText();
+    window.open(`https://t.me/vladimir_kozlove?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
@@ -333,42 +365,54 @@ export default function Index() {
               </h2>
               <div className="space-y-6 mb-10">
                 {[
-                  { icon: "Phone", label: "Телефон", value: "+7 (900) 000-00-00" },
-                  { icon: "Mail", label: "Email", value: "stylist@example.com" },
-                  { icon: "MapPin", label: "Город", value: "Москва" },
-                  { icon: "Instagram", label: "Instagram", value: "@sv_stylist" },
-                ].map(({ icon, label, value }) => (
-                  <div key={label} className="flex items-center gap-5">
-                    <div className="w-10 h-10 border border-gold/30 flex items-center justify-center flex-shrink-0">
+                  { icon: "Mail", label: "Email", value: "theboban@gmail.com", href: "mailto:theboban@gmail.com" },
+                  { icon: "Send", label: "Telegram", value: "@vladimir_kozlove", href: "https://t.me/vladimir_kozlove" },
+                  { icon: "MapPin", label: "Город", value: "Москва", href: null },
+                ].map(({ icon, label, value, href }) => (
+                  <a key={label}
+                    href={href || undefined}
+                    target={href?.startsWith("http") ? "_blank" : undefined}
+                    rel="noopener noreferrer"
+                    className={`flex items-center gap-5 group ${href ? "cursor-pointer" : ""}`}>
+                    <div className="w-10 h-10 border border-gold/30 group-hover:bg-gold/10 group-hover:border-gold transition-all flex items-center justify-center flex-shrink-0">
                       <Icon name={icon} size={16} className="text-gold" />
                     </div>
                     <div>
                       <div className="text-xs text-champagne/40 tracking-widest uppercase mb-0.5">{label}</div>
-                      <div className="text-champagne text-sm">{value}</div>
+                      <div className="text-champagne text-sm group-hover:text-gold transition-colors">{value}</div>
                     </div>
-                  </div>
+                  </a>
                 ))}
               </div>
             </div>
 
             <div className={`transition-all duration-1000 delay-200 ${contactSection.inView ? "opacity-100 translate-x-0" : "opacity-0 translate-x-10"}`}>
-              <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-4" onSubmit={handleSubmit}>
                 <div>
-                  <input type="text" placeholder="Ваше имя"
+                  <input type="text" placeholder="Ваше имя" required
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="w-full bg-transparent border border-champagne/20 focus:border-gold/60 outline-none px-5 py-4 text-champagne placeholder:text-champagne/30 text-sm transition-colors duration-300" />
                 </div>
                 <div>
-                  <input type="tel" placeholder="Телефон"
+                  <input type="tel" placeholder="Телефон" required
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     className="w-full bg-transparent border border-champagne/20 focus:border-gold/60 outline-none px-5 py-4 text-champagne placeholder:text-champagne/30 text-sm transition-colors duration-300" />
                 </div>
                 <div>
-                  <select className="w-full bg-obsidian border border-champagne/20 focus:border-gold/60 outline-none px-5 py-4 text-champagne/60 text-sm transition-colors duration-300">
+                  <select
+                    value={form.service}
+                    onChange={(e) => setForm({ ...form, service: e.target.value })}
+                    className="w-full bg-obsidian border border-champagne/20 focus:border-gold/60 outline-none px-5 py-4 text-champagne/60 text-sm transition-colors duration-300">
                     <option value="">Выберите услугу</option>
                     {services.map(s => <option key={s.title}>{s.title}</option>)}
                   </select>
                 </div>
                 <div>
                   <textarea rows={4} placeholder="Расскажите о себе и своей задаче"
+                    value={form.message}
+                    onChange={(e) => setForm({ ...form, message: e.target.value })}
                     className="w-full bg-transparent border border-champagne/20 focus:border-gold/60 outline-none px-5 py-4 text-champagne placeholder:text-champagne/30 text-sm resize-none transition-colors duration-300" />
                 </div>
                 <label className="flex items-start gap-3 cursor-pointer group select-none pt-2">
@@ -398,9 +442,20 @@ export default function Index() {
                 </label>
                 <button type="submit"
                   disabled={!agreed}
-                  className="w-full bg-gold text-obsidian text-xs tracking-[0.3em] uppercase py-4 font-semibold hover:bg-gold-light transition-all duration-300 hover:shadow-[0_0_30px_rgba(201,168,76,0.4)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:bg-gold">
+                  className="w-full bg-gold text-obsidian text-xs tracking-[0.3em] uppercase py-4 font-semibold hover:bg-gold-light transition-all duration-300 hover:shadow-[0_0_30px_rgba(201,168,76,0.4)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:bg-gold flex items-center justify-center gap-3">
+                  <Icon name="Mail" size={14} />
                   Отправить заявку
                 </button>
+                <button type="button"
+                  disabled={!agreed}
+                  onClick={openTelegramOnly}
+                  className="w-full border border-gold/60 text-gold text-xs tracking-[0.3em] uppercase py-4 hover:bg-gold/10 transition-all duration-300 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center gap-3">
+                  <Icon name="Send" size={14} />
+                  Написать в Telegram
+                </button>
+                <p className="text-champagne/40 text-[11px] leading-relaxed pt-2">
+                  При отправке откроется ваш почтовый клиент и Telegram с заполненным сообщением для подтверждения отправки.
+                </p>
               </form>
             </div>
           </div>
