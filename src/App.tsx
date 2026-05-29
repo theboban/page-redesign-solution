@@ -12,12 +12,14 @@ import Terms from "./pages/Terms";
 
 const queryClient = new QueryClient();
 
+const BASENAME = import.meta.env.PROD ? "/stylist-new" : "/";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename={BASENAME}>
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/privacy" element={<Privacy />} />
